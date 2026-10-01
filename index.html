@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TaskTracker - Balanced Neon Theme</title>
+  <style>
+    :root {
+      /* Fondo neutro intermedio (Slate / Charcoal Soft) */
+      --bg-body: #1E293B;
+      --bg-main: #1E293B;
+      --bg-card: #334155;
+      --bg-card-secondary: #0F172A;
+      
+      /* Colores Neón Vibrantes */
+      --neon-green: #00FF66;
+      --neon-green-glow: rgba(0, 255, 102, 0.35);
+      
+      --neon-cyan: #00E5FF;
+      --neon-cyan-glow: rgba(0, 229, 255, 0.35);
+
+      --neon-purple: #A855F7;
+      --neon-purple-glow: rgba(168, 85, 247, 0.3);
+
+      --neon-red: #FF2E63;
+      --neon-red-glow: rgba(255, 46, 99, 0.4);
+
+      /* Texto e Interfaz */
+      --text-main: #F8FAFC;
+      --text-sub: #94A3B8;
+      --border-color: rgba(255, 255, 255, 0.12);
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #0F172A;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 430px;
+      background-color: var(--bg-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-bottom: 40px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      border-left: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+    }
+
+    /* Header UI */
+    .header {
+      padding: 24px 20px 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 15px var(--neon-cyan-glow);
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #FFF;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .date-subheader {
+      padding: 0 20px 16px 20px;
+      color: var(--text-sub);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .main-content {
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Quick Action Button */
+    .top-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+
+    .btn-action:active {
+      transform: scale(0.98);
+    }
+
+    .btn-add-primary {
+      background: linear-gradient(135deg, var(--neon-green), #00CC52);
+      color: #052E16;
+      box-shadow: 0 6px 20px var(--neon-green-glow);
+    }
+
+    /* Section Titles */
+    .section-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin: 12px 4px 0 4px;
+    }
+
+    /* Task Cards */
+    .task-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .task-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .task-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .task-goal {
+      font-size: 12px;
+      color: var(--text-sub);
+      font-weight: 700;
+    }
+
+    .task-action-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-sub);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 6px;
+      border-radius: 8px;
+      transition: color 0.2s, background-color 0.2s;
+    }
+
+    .task-action-btn:hover {
+      color: #FFF;
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* Battery Progress Bar (Medium Neon) */
+    .battery-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .battery-shell {
+      flex: 1;
+      height: 26px;
+      background: var(--bg-card-secondary);
+      border: 2px solid #475569;
+      border-radius: 10px;
+      padding: 2px;
+      position: relative;
+    }
+
+    .battery-shell::after {
+      content: '';
+      position: absolute;
+      right: -7px;
+      top: 6px;
+      width: 4px;
+      height: 10px;
+      background: #475569;
+      border-radius: 0 3px 3px 0;
+    }
+
+    .battery-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));
+      border-radius: 6px;
+      width: 0%;
+      transition: width 0.4s ease;
+      box-shadow: 0 0 12px var(--neon-green-glow);
+    }
+
+    .battery-percent {
+      font-size: 14px;
+      font-weight: 900;
+      min-width: 46px;
+      text-align: right;
+      color: var(--neon-green);
+    }
+
+    /* Timer Row */
+    .timer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card-secondary);
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .timer-display {
+      font-family: monospace;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px var(--neon-cyan-glow);
+    }
+
+    .btn-timer {
+      background: var(--neon-green);
+      color: #052E16;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-weight: 900;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: 0 0 12px var(--neon-green-glow);
+      transition: transform 0.1s;
+    }
+
+    .btn-timer:active {
+      transform: scale(0.95);
+    }
+
+    .btn-timer.active {
+      background: var(--neon-red);
+      color: #FFF;
+      box-shadow: 0 0 12px var(--neon-red-glow);
+    }
+
+    /* Collapsible History Section */
+    .accordion-toggle {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.2s;
+    }
+
+    .accordion-toggle:hover {
+      background: #3B4F68;
+    }
+
+    .accordion-arrow {
+      transition: transform 0.3s ease;
+      font-size: 12px;
+    }
+
+    .accordion-arrow.open {
+      transform: rotate(180deg);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease-in-out, opacity 0.3s ease;
+      opacity: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .accordion-content.open {
+      max-height: 1000px;
+      opacity: 1;
+      padding-top: 12px;
+    }
+
+    .history-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+
+    .history-date {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--neon-cyan);
+    }
+
+    .history-summary {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--neon-green);
+    }
+
+    .history-task-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      padding: 6px 0;
+    }
+
+    .history-task-name {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    .history-task-stat {
+      color: var(--text-sub);
+      font-weight: 800;
+    }
+
+    .empty-history {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-sub);
+      font-size: 13px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--border-color);
+    }
+
+    /* Modal Form */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--neon-cyan);
+      width: 90%;
+      max-width: 360px;
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-size: 12px;
+      color: var(--text-sub);
+      font-weight: 700;
+    }
+
+    .input-control {
+      background: var(--bg-card-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .input-control:focus {
+      border-color: var(--neon-cyan);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-modal {
+      flex: 1;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-modal-cancel {
+      background: var(--bg-card-secondary);
+      color: var(--text-sub);
+    }
+
+    .btn-modal-save {
+      background: var(--neon-cyan);
+      color: #003344;
+      box-shadow: 0 4px 12px var(--neon-cyan-glow);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand-group">
+        <div class="brand-icon">⏱️</div>
+        <div class="brand-name">CONTROL DE TAREAS</div>
+      </div>
+    </header>
+    
+    <div class="date-subheader" id="current-date">JUEVES, 1 DE OCTUBRE DE 2026</div>
+
+    <main class="main-content">
+      <!-- Quick Action Button -->
+      <div class="top-actions">
+        <button class="btn-action btn-add-primary" id="open-modal-btn">
+          ➕ Agregar Nueva Tarea
+        </button>
+      </div>
+
+      <!-- Active Tasks Section -->
+      <div class="section-title">Tareas Activas de la Semana</div>
+      <div id="tasks-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+      <!-- Collapsible History Section -->
+      <button class="accordion-toggle" id="history-toggle-btn">
+        <span>📚 Historial de Semanas Anteriores</span>
+        <span class="accordion-arrow" id="history-arrow">▼</span>
+      </button>
+      
+      <div class="accordion-content" id="history-accordion">
+        <div id="history-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal for Creating/Editing Task -->
+  <div class="modal-overlay" id="task-modal">
+    <div class="modal-box">
+      <div class="modal-title" id="modal-title-text">Nueva Tarea Semanal</div>
+      
+      <div class="input-group">
+        <label for="task-name-input">Nombre de la tarea</label>
+        <input type="text" id="task-name-input" class="input-control" placeholder="Ej. Estudiar Programación">
+      </div>
+
+      <div class="input-group">
+        <label for="task-hours-input">Meta semanal (Horas)</label>
+        <input type="number" id="task-hours-input" class="input-control" placeholder="Ej. 8" min="1" max="168">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-modal btn-modal-cancel" id="close-modal-btn">Cancelar</button>
+        <button class="btn-modal btn-modal-save" id="save-task-btn">Guardar Tarea</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // App State
+    let tasks = JSON.parse(localStorage.getItem('moneta_tasks')) || [
+      { id: 1, name: 'Estudiar Programación', goalHours: 8, loggedSeconds: 7200, active: false }
+    ];
+
+    let history = JSON.parse(localStorage.getItem('moneta_history')) || [];
+    let lastWeekIdentifier = localStorage.getItem('moneta_last_week_id') || getWeekIdentifier(new Date());
+
+    let timerInterval = null;
+    let activeTaskId = null;
+    let editingTaskId = null;
+
+    // Elements
+    const tasksContainer = document.getElementById('tasks-container');
+    const historyContainer = document.getElementById('history-container');
+    const historyToggleBtn = document.getElementById('history-toggle-btn');
+    const historyAccordion = document.getElementById('history-accordion');
+    const historyArrow = document.getElementById('history-arrow');
+
+    const taskModal = document.getElementById('task-modal');
+    const modalTitleText = document.getElementById('modal-title-text');
+    const openModalBtn = document.getElementById('open-modal-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const saveTaskBtn = document.getElementById('save-task-btn');
+    const taskNameInput = document.getElementById('task-name-input');
+    const taskHoursInput = document.getElementById('task-hours-input');
+    const currentDateEl = document.getElementById('current-date');
+
+    // Get Week Identifier String (e.g. "2026-W40")
+    function getWeekIdentifier(date) {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+      return `${d.getUTCFullYear()}-W${weekNo}`;
+    }
+
+    // Auto-Close Week logic on Sunday or new week startup
+    function checkAutoCloseWeek() {
+      const now = new Date();
+      const currentWeekId = getWeekIdentifier(now);
+
+      if (lastWeekIdentifier !== currentWeekId) {
+        autoArchiveCurrentWeek(lastWeekIdentifier);
+        lastWeekIdentifier = currentWeekId;
+        localStorage.setItem('moneta_last_week_id', currentWeekId);
+      }
+    }
+
+    function autoArchiveCurrentWeek(previousWeekLabel) {
+      if (tasks.length === 0) return;
+
+      clearInterval(timerInterval);
+
+      let totalLoggedSec = 0;
+      let totalGoalSec = 0;
+
+      const tasksSummary = tasks.map(t => {
+        totalLoggedSec += t.loggedSeconds;
+        totalGoalSec += t.goalHours * 3600;
+        const p = Math.min(100, Math.round((t.loggedSeconds / (t.goalHours * 3600)) * 100));
+        return {
+          name: t.name,
+          loggedHours: (t.loggedSeconds / 3600).toFixed(1),
+          goalHours: t.goalHours,
+          percent: p
+        };
+      });
+
+      const overallPercent = totalGoalSec > 0 ? Math.min(100, Math.round((totalLoggedSec / totalGoalSec) * 100)) : 0;
+      const archiveDateStr = new Date().toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' });
+
+      // Save to history
+      history.unshift({
+        id: Date.now(),
+        dateRange: archiveDateStr,
+        totalLoggedHours: (totalLoggedSec / 3600).toFixed(1),
+        overallPercent,
+        tasksSummary
+      });
+
+      // Reset active task timers for the new week
+      tasks.forEach(t => {
+        t.loggedSeconds = 0;
+        t.active = false;
+      });
+
+      saveState();
+    }
+
+    // Date Display
+    function updateDateDisplay() {
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const today = new Date();
+      currentDateEl.textContent = today.toLocaleDateString('es-ES', options).toUpperCase();
+    }
+
+    // Save State
+    function saveState() {
+      localStorage.setItem('moneta_tasks', JSON.stringify(tasks));
+      localStorage.setItem('moneta_history', JSON.stringify(history));
+      render();
+    }
+
+    // Render Function
+    function render() {
+      // 1. Render Active Tasks
+      tasksContainer.innerHTML = '';
+      if (tasks.length === 0) {
+        tasksContainer.innerHTML = `<div class="empty-history">No tienes tareas activas. ¡Agrega una para comenzar!</div>`;
+      } else {
+        tasks.forEach(task => {
+          const goalSeconds = task.goalHours * 3600;
+          const percent = Math.min(100, Math.round((task.loggedSeconds / goalSeconds) * 100));
+          const hoursLogged = (task.loggedSeconds / 3600).toFixed(1);
+
+          const card = document.createElement('div');
+          card.className = 'task-card';
+          card.innerHTML = `
+            <div class="task-header">
+              <div>
+                <div class="task-name">${task.name}</div>
+                <div class="task-goal">${hoursLogged} / ${task.goalHours} hrs acumuladas</div>
+              </div>
+              <div class="task-actions-group">
+                <button class="task-action-btn" onclick="openEditModal(${task.id})" title="Editar Tarea">✏️</button>
+                <button class="task-action-btn" onclick="deleteTask(${task.id})" title="Eliminar Tarea">🗑️</button>
+              </div>
+            </div>
+
+            <div class="battery-container">
+              <div class="battery-shell">
+                <div class="battery-fill" style="width: ${percent}%;"></div>
+              </div>
+              <div class="battery-percent">${percent}%</div>
+            </div>
+
+            <div class="timer-row">
+              <div class="timer-display" id="timer-${task.id}">
+                ${formatTime(task.loggedSeconds)}
+              </div>
+              <button class="btn-timer ${task.active ? 'active' : ''}" onclick="toggleTimer(${task.id})">
+                ${task.active ? 'PAUSAR' : 'INICIAR'}
+              </button>
+            </div>
+          `;
+          tasksContainer.appendChild(card);
+        });
+      }
+
+      // 2. Render History
+      historyContainer.innerHTML = '';
+      if (history.length === 0) {
+        historyContainer.innerHTML = `<div class="empty-history">Aún no se ha completado ninguna semana.</div>`;
+      } else {
+        history.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'history-card';
+
+          let tasksListHTML = item.tasksSummary.map(t => `
+            <div class="history-task-item">
+              <span class="history-task-name">• ${t.name}</span>
+              <span class="history-task-stat">${t.loggedHours} / ${t.goalHours} hrs (${t.percent}%)</span>
+            </div>
+          `).join('');
+
+          card.innerHTML = `
+            <div class="history-header">
+              <span class="history-date">📅 Semana del ${item.dateRange}</span>
+              <span class="history-summary">${item.totalLoggedHours} hrs totales (${item.overallPercent}%)</span>
+            </div>
+            <div>${tasksListHTML}</div>
+          `;
+          historyContainer.appendChild(card);
+        });
+      }
+    }
+
+    // Toggle Accordion History
+    historyToggleBtn.onclick = () => {
+      const isOpen = historyAccordion.classList.contains('open');
+      if (isOpen) {
+        historyAccordion.classList.remove('open');
+        historyArrow.classList.remove('open');
+      } else {
+        historyAccordion.classList.add('open');
+        historyArrow.classList.add('open');
+      }
+    };
+
+    // Format Seconds to HH:MM:SS
+    function formatTime(totalSeconds) {
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+      return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    // Toggle Timer
+    window.toggleTimer = function(id) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+
+      if (task.active) {
+        task.active = false;
+        clearInterval(timerInterval);
+        timerInterval = null;
+        activeTaskId = null;
+      } else {
+        tasks.forEach(t => t.active = false);
+        clearInterval(timerInterval);
+
+        task.active = true;
+        activeTaskId = id;
+
+        timerInterval = setInterval(() => {
+          task.loggedSeconds++;
+          const timerEl = document.getElementById(`timer-${task.id}`);
+          if (timerEl) timerEl.textContent = formatTime(task.loggedSeconds);
+        }, 1000);
+      }
+      saveState();
+    };
+
+    // Open Edit Modal
+    window.openEditModal = function(id) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+
+      editingTaskId = id;
+      modalTitleText.textContent = 'Editar Tarea';
+      taskNameInput.value = task.name;
+      taskHoursInput.value = task.goalHours;
+      taskModal.classList.add('open');
+    };
+
+    // Delete Task
+    window.deleteTask = function(id) {
+      if (confirm('¿Deseas eliminar esta tarea?')) {
+        if (activeTaskId === id) clearInterval(timerInterval);
+        tasks = tasks.filter(t => t.id !== id);
+        saveState();
+      }
+    };
+
+    // Modal Control
+    openModalBtn.onclick = () => {
+      editingTaskId = null;
+      modalTitleText.textContent = 'Nueva Tarea Semanal';
+      taskNameInput.value = '';
+      taskHoursInput.value = '';
+      taskModal.classList.add('open');
+    };
+
+    closeModalBtn.onclick = () => taskModal.classList.remove('open');
+
+    saveTaskBtn.onclick = () => {
+      const name = taskNameInput.value.trim();
+      const hours = parseFloat(taskHoursInput.value);
+
+      if (!name || isNaN(hours) || hours <= 0) {
+        alert('Por favor ingresa un nombre y una cantidad válida de horas.');
+        return;
+      }
+
+      if (editingTaskId !== null) {
+        // Edit Existing Task
+        const task = tasks.find(t => t.id === editingTaskId);
+        if (task) {
+          task.name = name;
+          task.goalHours = hours;
+        }
+      } else {
+        // Create New Task
+        tasks.push({
+          id: Date.now(),
+          name,
+          goalHours: hours,
+          loggedSeconds: 0,
+          active: false
+        });
+      }
+
+      taskNameInput.value = '';
+      taskHoursInput.value = '';
+      editingTaskId = null;
+      taskModal.classList.remove('open');
+      saveState();
+    };
+
+    // Initialize & Periodic Auto-check
+    checkAutoCloseWeek();
+    setInterval(checkAutoCloseWeek, 60000); // Check every minute
+    updateDateDisplay();
+    render();
+  </script>
+</body>
+</html>
