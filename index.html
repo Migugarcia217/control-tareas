@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TaskTracker - Background Timer</title>
+  <title>TaskTracker - Background Sync</title>
   <!-- Icono para el navegador y pantalla de inicio en Android -->
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   
@@ -527,11 +527,10 @@
 
   <script>
     // App State
-    let tasks = JSON.parse(localStorage.getItem('moneta_tasks_v7')) || [
+    let tasks = JSON.parse(localStorage.getItem('moneta_tasks_v8')) || [
       { id: 1, name: 'Estudiar Programación', goalHours: 5, loggedSeconds: 3600, deadline: '2026-10-10', active: false, startTime: null }
     ];
 
-    let timerInterval = null;
     let editingTaskId = null;
 
     // Elements
@@ -555,7 +554,7 @@
 
     // Save State
     function saveState() {
-      localStorage.setItem('moneta_tasks_v7', JSON.stringify(tasks));
+      localStorage.setItem('moneta_tasks_v8', JSON.stringify(tasks));
     }
 
     // Sound Alarm Generator (Web Audio API) & Vibration
@@ -588,11 +587,11 @@
           }, i * 600);
         }
       } catch (e) {
-        console.log('Audio Context not supported or blocked', e);
+        console.log('Audio Context error', e);
       }
     }
 
-    // Calculate elapsed time taking background time into account
+    // Calculate current seconds based on actual real-world clock time
     function getTaskCurrentSeconds(task) {
       if (task.active && task.startTime) {
         const secondsSinceStart = Math.floor((Date.now() - task.startTime) / 1000);
@@ -704,12 +703,10 @@
       if (!task || task.status) return;
 
       if (task.active) {
-        // Pausar: consolidar el tiempo transcurrido real
         task.loggedSeconds = getTaskCurrentSeconds(task);
         task.active = false;
         task.startTime = null;
       } else {
-        // Pausar cualquier otra tarea activa
         tasks.forEach(t => {
           if (t.active) {
             t.loggedSeconds = getTaskCurrentSeconds(t);
@@ -718,7 +715,6 @@
           }
         });
 
-        // Iniciar
         task.active = true;
         task.startTime = Date.now();
       }
@@ -726,7 +722,20 @@
       render();
     };
 
-    // Global Loop to update UI smoothly and handle background returns
+    // CRITICAL: Detect when user returns to the app from background/lockscreen and sync instantly
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        saveState();
+        render(); // Recalcula y actualiza todo el tiempo transcurrido en segundo plano
+      }
+    });
+
+    window.addEventListener("pageshow", () => {
+      saveState();
+      render();
+    });
+
+    // Global Loop for smooth ticking when app is open
     setInterval(() => {
       let needsSave = false;
       tasks.forEach(task => {
@@ -734,7 +743,6 @@
           const currentSecs = getTaskCurrentSeconds(task);
           const goalSeconds = task.goalHours * 3600;
 
-          // Check if goal reached while active
           if (currentSecs >= goalSeconds) {
             task.loggedSeconds = goalSeconds;
             task.active = false;
@@ -744,7 +752,6 @@
             needsSave = true;
           }
 
-          // Live DOM updates for fluid countdown without full re-render
           const timerEl = document.getElementById(`timer-${task.id}`);
           const fillEl = document.getElementById(`fill-${task.id}`);
           const percentEl = document.getElementById(`percent-${task.id}`);
@@ -798,7 +805,7 @@
       taskModal.classList.add('open');
     };
 
-    closeModalBtn.onclick = () => taskModal.classList.remove('open');
+    closeModalBtn.onclick = () => taskModal.classList.remove('org') || taskModal.classList.remove('open');
 
     saveTaskBtn.onclick = () => {
       const name = taskNameInput.value.trim();
