@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TaskTracker - Balanced Neon Theme</title>
+  <title>TaskTracker - Alarm Alert</title>
   <!-- Icono para el navegador y pantalla de inicio en Android -->
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   
@@ -53,7 +53,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Montserrat', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -92,18 +92,18 @@
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
     .brand-icon {
-      width: 38px;
-      height: 38px;
+      width: 44px;
+      height: 44px;
       background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 22px;
       box-shadow: 0 4px 15px var(--neon-cyan-glow);
     }
 
@@ -118,7 +118,7 @@
     .date-subheader {
       padding: 0 20px 16px 20px;
       color: var(--text-sub);
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.8px;
@@ -139,14 +139,14 @@
 
     .btn-action {
       width: 100%;
-      padding: 16px;
+      padding: 18px;
       border-radius: var(--radius-md);
-      font-size: 15px;
-      font-weight: 800;
+      font-size: 16px;
+      font-weight: 900;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       cursor: pointer;
       border: none;
       transition: transform 0.1s, box-shadow 0.2s;
@@ -164,8 +164,8 @@
 
     /* Section Titles */
     .section-title {
-      font-size: 13px;
-      font-weight: 800;
+      font-size: 14px;
+      font-weight: 900;
       color: var(--text-sub);
       text-transform: uppercase;
       letter-spacing: 0.8px;
@@ -177,11 +177,22 @@
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
-      padding: 18px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 14px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      position: relative;
+    }
+
+    .task-card.failed {
+      border-color: var(--neon-red);
+      box-shadow: 0 8px 20px var(--neon-red-glow);
+    }
+
+    .task-card.completed {
+      border-color: var(--neon-green);
+      box-shadow: 0 8px 20px var(--neon-green-glow);
     }
 
     .task-header {
@@ -197,15 +208,47 @@
     }
 
     .task-name {
-      font-size: 17px;
-      font-weight: 800;
+      font-size: 20px;
+      font-weight: 900;
       color: var(--text-main);
+      letter-spacing: -0.3px;
     }
 
     .task-goal {
-      font-size: 12px;
+      font-size: 14px;
       color: var(--text-sub);
       font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .task-deadline {
+      font-size: 13px;
+      color: var(--neon-cyan);
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .status-badge {
+      font-size: 13px;
+      font-weight: 900;
+      padding: 6px 12px;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    .status-badge.failed {
+      background: rgba(255, 46, 99, 0.2);
+      color: var(--neon-red);
+      border: 1px solid var(--neon-red);
+    }
+
+    .status-badge.completed {
+      background: rgba(0, 255, 102, 0.2);
+      color: var(--neon-green);
+      border: 1px solid var(--neon-green);
     }
 
     .task-action-btn {
@@ -213,8 +256,8 @@
       border: none;
       color: var(--text-sub);
       cursor: pointer;
-      font-size: 16px;
-      padding: 6px;
+      font-size: 18px;
+      padding: 8px;
       border-radius: 8px;
       transition: color 0.2s, background-color 0.2s;
     }
@@ -224,16 +267,16 @@
       background: rgba(255,255,255,0.1);
     }
 
-    /* Battery Progress Bar (Medium Neon) */
+    /* Battery Progress Bar */
     .battery-container {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
     .battery-shell {
       flex: 1;
-      height: 26px;
+      height: 28px;
       background: var(--bg-card-secondary);
       border: 2px solid #475569;
       border-radius: 10px;
@@ -245,7 +288,7 @@
       content: '';
       position: absolute;
       right: -7px;
-      top: 6px;
+      top: 7px;
       width: 4px;
       height: 10px;
       background: #475569;
@@ -262,9 +305,9 @@
     }
 
     .battery-percent {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 900;
-      min-width: 46px;
+      min-width: 56px;
       text-align: right;
       color: var(--neon-green);
     }
@@ -275,27 +318,28 @@
       justify-content: space-between;
       align-items: center;
       background: var(--bg-card-secondary);
-      padding: 12px 16px;
+      padding: 14px 18px;
       border-radius: var(--radius-sm);
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .timer-display {
-      font-family: monospace;
-      font-size: 20px;
-      font-weight: 800;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 24px;
+      font-weight: 900;
       color: var(--neon-cyan);
       text-shadow: 0 0 8px var(--neon-cyan-glow);
+      letter-spacing: 1px;
     }
 
     .btn-timer {
       background: var(--neon-green);
       color: #052E16;
       border: none;
-      padding: 8px 18px;
+      padding: 12px 22px;
       border-radius: 20px;
       font-weight: 900;
-      font-size: 12px;
+      font-size: 14px;
       cursor: pointer;
       box-shadow: 0 0 12px var(--neon-green-glow);
       transition: transform 0.1s;
@@ -311,111 +355,22 @@
       box-shadow: 0 0 12px var(--neon-red-glow);
     }
 
-    /* Collapsible History Section */
-    .accordion-toggle {
-      width: 100%;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 16px;
-      color: var(--text-main);
-      font-size: 13px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      margin-top: 12px;
-      transition: background 0.2s;
-    }
-
-    .accordion-toggle:hover {
-      background: #3B4F68;
-    }
-
-    .accordion-arrow {
-      transition: transform 0.3s ease;
-      font-size: 12px;
-    }
-
-    .accordion-arrow.open {
-      transform: rotate(180deg);
-    }
-
-    .accordion-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease-in-out, opacity 0.3s ease;
-      opacity: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .accordion-content.open {
-      max-height: 1000px;
-      opacity: 1;
-      padding-top: 12px;
-    }
-
-    .history-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 10px;
-    }
-
-    .history-date {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--neon-cyan);
-    }
-
-    .history-summary {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--neon-green);
-    }
-
-    .history-task-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      padding: 6px 0;
-    }
-
-    .history-task-name {
-      color: var(--text-main);
-      font-weight: 700;
-    }
-
-    .history-task-stat {
-      color: var(--text-sub);
-      font-weight: 800;
+    .btn-timer:disabled {
+      background: #475569;
+      color: #94A3B8;
+      box-shadow: none;
+      cursor: not-allowed;
     }
 
     .empty-history {
       text-align: center;
-      padding: 20px;
+      padding: 24px;
       color: var(--text-sub);
-      font-size: 13px;
+      font-size: 14px;
       background: var(--bg-card);
       border-radius: var(--radius-md);
       border: 1px dashed var(--border-color);
+      font-weight: 700;
     }
 
     /* Modal Form */
@@ -425,7 +380,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
@@ -455,7 +410,7 @@
     }
 
     .modal-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 900;
       color: var(--text-main);
     }
@@ -463,23 +418,24 @@
     .input-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
 
     .input-group label {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-sub);
-      font-weight: 700;
+      font-weight: 800;
+      text-transform: uppercase;
     }
 
     .input-control {
       background: var(--bg-card-secondary);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 12px;
+      padding: 14px;
       border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: 700;
       outline: none;
     }
 
@@ -489,16 +445,17 @@
 
     .modal-actions {
       display: flex;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 12px;
+      margin-top: 12px;
     }
 
     .btn-modal {
       flex: 1;
-      padding: 12px;
+      padding: 14px;
       border-radius: var(--radius-sm);
       border: none;
-      font-weight: 800;
+      font-weight: 900;
+      font-size: 15px;
       cursor: pointer;
     }
 
@@ -525,36 +482,26 @@
       </div>
     </header>
     
-    <div class="date-subheader" id="current-date">JUEVES, 1 DE OCTUBRE DE 2026</div>
+    <div class="date-subheader" id="current-date">VIERNES, 2 DE OCTUBRE DE 2026</div>
 
     <main class="main-content">
       <!-- Quick Action Button -->
       <div class="top-actions">
         <button class="btn-action btn-add-primary" id="open-modal-btn">
-          ➕ Agregar Nueva Tarea
+          ➕ AGREGAR NUEVA TAREA
         </button>
       </div>
 
       <!-- Active Tasks Section -->
-      <div class="section-title">Tareas Activas de la Semana</div>
+      <div class="section-title">Mis Metas Activas</div>
       <div id="tasks-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
-
-      <!-- Collapsible History Section -->
-      <button class="accordion-toggle" id="history-toggle-btn">
-        <span>📚 Historial de Semanas Anteriores</span>
-        <span class="accordion-arrow" id="history-arrow">▼</span>
-      </button>
-      
-      <div class="accordion-content" id="history-accordion">
-        <div id="history-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
-      </div>
     </main>
   </div>
 
   <!-- Modal for Creating/Editing Task -->
   <div class="modal-overlay" id="task-modal">
     <div class="modal-box">
-      <div class="modal-title" id="modal-title-text">Nueva Tarea Semanal</div>
+      <div class="modal-title" id="modal-title-text">Nueva Meta con Fecha Límite</div>
       
       <div class="input-group">
         <label for="task-name-input">Nombre de la tarea</label>
@@ -562,25 +509,27 @@
       </div>
 
       <div class="input-group">
-        <label for="task-hours-input">Meta semanal (Horas)</label>
-        <input type="number" id="task-hours-input" class="input-control" placeholder="Ej. 8" min="1" max="168">
+        <label for="task-hours-input">Meta de horas totales</label>
+        <input type="number" id="task-hours-input" class="input-control" placeholder="Ej. 10" min="1">
+      </div>
+
+      <div class="input-group">
+        <label for="task-date-input">Fecha límite</label>
+        <input type="date" id="task-date-input" class="input-control">
       </div>
 
       <div class="modal-actions">
         <button class="btn-modal btn-modal-cancel" id="close-modal-btn">Cancelar</button>
-        <button class="btn-modal btn-modal-save" id="save-task-btn">Guardar Tarea</button>
+        <button class="btn-modal btn-modal-save" id="save-task-btn">Guardar</button>
       </div>
     </div>
   </div>
 
   <script>
     // App State
-    let tasks = JSON.parse(localStorage.getItem('moneta_tasks')) || [
-      { id: 1, name: 'Estudiar Programación', goalHours: 8, loggedSeconds: 7200, active: false }
+    let tasks = JSON.parse(localStorage.getItem('moneta_tasks_v6')) || [
+      { id: 1, name: 'Estudiar Programación', goalHours: 5, loggedSeconds: 3600, deadline: '2026-10-10', active: false }
     ];
-
-    let history = JSON.parse(localStorage.getItem('moneta_history')) || [];
-    let lastWeekIdentifier = localStorage.getItem('moneta_last_week_id') || getWeekIdentifier(new Date());
 
     let timerInterval = null;
     let activeTaskId = null;
@@ -588,11 +537,6 @@
 
     // Elements
     const tasksContainer = document.getElementById('tasks-container');
-    const historyContainer = document.getElementById('history-container');
-    const historyToggleBtn = document.getElementById('history-toggle-btn');
-    const historyAccordion = document.getElementById('history-accordion');
-    const historyArrow = document.getElementById('history-arrow');
-
     const taskModal = document.getElementById('task-modal');
     const modalTitleText = document.getElementById('modal-title-text');
     const openModalBtn = document.getElementById('open-modal-btn');
@@ -600,70 +544,8 @@
     const saveTaskBtn = document.getElementById('save-task-btn');
     const taskNameInput = document.getElementById('task-name-input');
     const taskHoursInput = document.getElementById('task-hours-input');
+    const taskDateInput = document.getElementById('task-date-input');
     const currentDateEl = document.getElementById('current-date');
-
-    // Get Week Identifier String (e.g. "2026-W40")
-    function getWeekIdentifier(date) {
-      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-      const dayNum = d.getUTCDay() || 7;
-      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-      const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-      return `${d.getUTCFullYear()}-W${weekNo}`;
-    }
-
-    // Auto-Close Week logic on Sunday or new week startup
-    function checkAutoCloseWeek() {
-      const now = new Date();
-      const currentWeekId = getWeekIdentifier(now);
-
-      if (lastWeekIdentifier !== currentWeekId) {
-        autoArchiveCurrentWeek(lastWeekIdentifier);
-        lastWeekIdentifier = currentWeekId;
-        localStorage.setItem('moneta_last_week_id', currentWeekId);
-      }
-    }
-
-    function autoArchiveCurrentWeek(previousWeekLabel) {
-      if (tasks.length === 0) return;
-
-      clearInterval(timerInterval);
-
-      let totalLoggedSec = 0;
-      let totalGoalSec = 0;
-
-      const tasksSummary = tasks.map(t => {
-        totalLoggedSec += t.loggedSeconds;
-        totalGoalSec += t.goalHours * 3600;
-        const p = Math.min(100, Math.round((t.loggedSeconds / (t.goalHours * 3600)) * 100));
-        return {
-          name: t.name,
-          loggedHours: (t.loggedSeconds / 3600).toFixed(1),
-          goalHours: t.goalHours,
-          percent: p
-        };
-      });
-
-      const overallPercent = totalGoalSec > 0 ? Math.min(100, Math.round((totalLoggedSec / totalGoalSec) * 100)) : 0;
-      const archiveDateStr = new Date().toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' });
-
-      // Save to history
-      history.unshift({
-        id: Date.now(),
-        dateRange: archiveDateStr,
-        totalLoggedHours: (totalLoggedSec / 3600).toFixed(1),
-        overallPercent,
-        tasksSummary
-      });
-
-      // Reset active task timers for the new week
-      tasks.forEach(t => {
-        t.loggedSeconds = 0;
-        t.active = false;
-      });
-
-      saveState();
-    }
 
     // Date Display
     function updateDateDisplay() {
@@ -674,96 +556,134 @@
 
     // Save State
     function saveState() {
-      localStorage.setItem('moneta_tasks', JSON.stringify(tasks));
-      localStorage.setItem('moneta_history', JSON.stringify(history));
+      localStorage.setItem('moneta_tasks_v6', JSON.stringify(tasks));
       render();
+    }
+
+    // Sound Alarm Generator (Web Audio API) & Vibration
+    function playAlarm() {
+      // Trigger vibration on mobile if supported
+      if (navigator.vibrate) {
+        navigator.vibrate([500, 250, 500, 250, 500]);
+      }
+
+      // Generate beep sound using browser's AudioContext
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        for (let i = 0; i < 3; i++) {
+          setTimeout(() => {
+            if (audioCtx.state === 'suspended') {
+              audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.value = 880; // High pitch alarm tone
+            
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+          }, i * 600);
+        }
+      } catch (e) {
+        console.log('Audio Context not supported or blocked', e);
+      }
+    }
+
+    // Check Deadlines Status
+    function checkDeadlines() {
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      tasks.forEach(task => {
+        if (task.deadline <= todayStr && !task.status) {
+          if (task.active) {
+            task.active = false;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            activeTaskId = null;
+          }
+
+          const goalSeconds = task.goalHours * 3600;
+          if (task.loggedSeconds >= goalSeconds) {
+            task.status = 'completed';
+          } else {
+            task.status = 'failed';
+          }
+        }
+      });
     }
 
     // Render Function
     function render() {
-      // 1. Render Active Tasks
+      checkDeadlines();
       tasksContainer.innerHTML = '';
+
       if (tasks.length === 0) {
-        tasksContainer.innerHTML = `<div class="empty-history">No tienes tareas activas. ¡Agrega una para comenzar!</div>`;
-      } else {
-        tasks.forEach(task => {
-          const goalSeconds = task.goalHours * 3600;
-          const percent = Math.min(100, Math.round((task.loggedSeconds / goalSeconds) * 100));
-          const hoursLogged = (task.loggedSeconds / 3600).toFixed(1);
-
-          const card = document.createElement('div');
-          card.className = 'task-card';
-          card.innerHTML = `
-            <div class="task-header">
-              <div>
-                <div class="task-name">${task.name}</div>
-                <div class="task-goal">${hoursLogged} / ${task.goalHours} hrs acumuladas</div>
-              </div>
-              <div class="task-actions-group">
-                <button class="task-action-btn" onclick="openEditModal(${task.id})" title="Editar Tarea">✏️</button>
-                <button class="task-action-btn" onclick="deleteTask(${task.id})" title="Eliminar Tarea">🗑️</button>
-              </div>
-            </div>
-
-            <div class="battery-container">
-              <div class="battery-shell">
-                <div class="battery-fill" style="width: ${percent}%;"></div>
-              </div>
-              <div class="battery-percent">${percent}%</div>
-            </div>
-
-            <div class="timer-row">
-              <div class="timer-display" id="timer-${task.id}">
-                ${formatTime(task.loggedSeconds)}
-              </div>
-              <button class="btn-timer ${task.active ? 'active' : ''}" onclick="toggleTimer(${task.id})">
-                ${task.active ? 'PAUSAR' : 'INICIAR'}
-              </button>
-            </div>
-          `;
-          tasksContainer.appendChild(card);
-        });
+        tasksContainer.innerHTML = `<div class="empty-history">No tienes metas activas. ¡Agrega una para comenzar!</div>`;
+        return;
       }
 
-      // 2. Render History
-      historyContainer.innerHTML = '';
-      if (history.length === 0) {
-        historyContainer.innerHTML = `<div class="empty-history">Aún no se ha completado ninguna semana.</div>`;
-      } else {
-        history.forEach(item => {
-          const card = document.createElement('div');
-          card.className = 'history-card';
+      tasks.forEach(task => {
+        const goalSeconds = task.goalHours * 3600;
+        const percent = Math.min(100, Math.round((task.loggedSeconds / goalSeconds) * 100));
+        const hoursLogged = (task.loggedSeconds / 3600).toFixed(1);
 
-          let tasksListHTML = item.tasksSummary.map(t => `
-            <div class="history-task-item">
-              <span class="history-task-name">• ${t.name}</span>
-              <span class="history-task-stat">${t.loggedHours} / ${t.goalHours} hrs (${t.percent}%)</span>
-            </div>
-          `).join('');
+        let cardClass = 'task-card';
+        let statusHTML = '';
+        let timerDisabled = '';
 
-          card.innerHTML = `
-            <div class="history-header">
-              <span class="history-date">📅 Semana del ${item.dateRange}</span>
-              <span class="history-summary">${item.totalLoggedHours} hrs totales (${item.overallPercent}%)</span>
+        if (task.status === 'failed') {
+          cardClass += ' failed';
+          statusHTML = `<div class="status-badge failed">❌ Fallaste</div>`;
+          timerDisabled = 'disabled';
+        } else if (task.status === 'completed') {
+          cardClass += ' completed';
+          statusHTML = `<div class="status-badge completed">🎉 Cumpliste</div>`;
+          timerDisabled = 'disabled';
+        }
+
+        const card = document.createElement('div');
+        card.className = cardClass;
+        card.innerHTML = `
+          <div class="task-header">
+            <div>
+              <div class="task-name">${task.name}</div>
+              <div class="task-goal">${hoursLogged} / ${task.goalHours} hrs acumuladas</div>
+              <div class="task-deadline">📅 Límite: ${task.deadline}</div>
+              ${statusHTML}
             </div>
-            <div>${tasksListHTML}</div>
-          `;
-          historyContainer.appendChild(card);
-        });
-      }
+            <div class="task-actions-group">
+              <button class="task-action-btn" onclick="openEditModal(${task.id})" title="Editar Tarea">✏️</button>
+              <button class="task-action-btn" onclick="deleteTask(${task.id})" title="Eliminar Tarea">🗑️</button>
+            </div>
+          </div>
+
+          <div class="battery-container">
+            <div class="battery-shell">
+              <div class="battery-fill" style="width: ${percent}%;"></div>
+            </div>
+            <div class="battery-percent">${percent}%</div>
+          </div>
+
+          <div class="timer-row">
+            <div class="timer-display" id="timer-${task.id}">
+              ${formatTime(task.loggedSeconds)}
+            </div>
+            <button class="btn-timer ${task.active ? 'active' : ''}" ${timerDisabled} onclick="toggleTimer(${task.id})">
+              ${task.active ? 'PAUSAR' : 'INICIAR'}
+            </button>
+          </div>
+        `;
+        tasksContainer.appendChild(card);
+      });
     }
-
-    // Toggle Accordion History
-    historyToggleBtn.onclick = () => {
-      const isOpen = historyAccordion.classList.contains('open');
-      if (isOpen) {
-        historyAccordion.classList.remove('open');
-        historyArrow.classList.remove('open');
-      } else {
-        historyAccordion.classList.add('open');
-        historyArrow.classList.add('open');
-      }
-    };
 
     // Format Seconds to HH:MM:SS
     function formatTime(totalSeconds) {
@@ -776,7 +696,7 @@
     // Toggle Timer
     window.toggleTimer = function(id) {
       const task = tasks.find(t => t.id === id);
-      if (!task) return;
+      if (!task || task.status) return;
 
       if (task.active) {
         task.active = false;
@@ -792,8 +712,21 @@
 
         timerInterval = setInterval(() => {
           task.loggedSeconds++;
+          
+          // Check if goal is reached during active timing
+          if (task.loggedSeconds >= (task.goalHours * 3600)) {
+            task.active = false;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            activeTaskId = null;
+            task.status = 'completed';
+            playAlarm(); // Sonar alarma y vibración
+          }
+
           const timerEl = document.getElementById(`timer-${task.id}`);
           if (timerEl) timerEl.textContent = formatTime(task.loggedSeconds);
+          
+          saveState();
         }, 1000);
       }
       saveState();
@@ -805,9 +738,10 @@
       if (!task) return;
 
       editingTaskId = id;
-      modalTitleText.textContent = 'Editar Tarea';
+      modalTitleText.textContent = 'Editar Meta';
       taskNameInput.value = task.name;
       taskHoursInput.value = task.goalHours;
+      taskDateInput.value = task.deadline;
       taskModal.classList.add('open');
     };
 
@@ -823,9 +757,10 @@
     // Modal Control
     openModalBtn.onclick = () => {
       editingTaskId = null;
-      modalTitleText.textContent = 'Nueva Tarea Semanal';
+      modalTitleText.textContent = 'Nueva Meta con Fecha Límite';
       taskNameInput.value = '';
       taskHoursInput.value = '';
+      taskDateInput.value = '';
       taskModal.classList.add('open');
     };
 
@@ -834,42 +769,45 @@
     saveTaskBtn.onclick = () => {
       const name = taskNameInput.value.trim();
       const hours = parseFloat(taskHoursInput.value);
+      const deadline = taskDateInput.value;
 
-      if (!name || isNaN(hours) || hours <= 0) {
-        alert('Por favor ingresa un nombre y una cantidad válida de horas.');
+      if (!name || isNaN(hours) || hours <= 0 || !deadline) {
+        alert('Por favor completa todos los campos con valores válidos (incluyendo la fecha).');
         return;
       }
 
       if (editingTaskId !== null) {
-        // Edit Existing Task
         const task = tasks.find(t => t.id === editingTaskId);
         if (task) {
           task.name = name;
           task.goalHours = hours;
+          task.deadline = deadline;
+          task.status = undefined; 
         }
       } else {
-        // Create New Task
         tasks.push({
           id: Date.now(),
           name,
           goalHours: hours,
           loggedSeconds: 0,
-          active: false
+          deadline,
+          active: false,
+          status: undefined
         });
       }
 
       taskNameInput.value = '';
       taskHoursInput.value = '';
+      taskDateInput.value = '';
       editingTaskId = null;
       taskModal.classList.remove('open');
       saveState();
     };
 
-    // Initialize & Periodic Auto-check
-    checkAutoCloseWeek();
-    setInterval(checkAutoCloseWeek, 60000); // Check every minute
+    // Initialize
     updateDateDisplay();
     render();
+    setInterval(render, 30000);
   </script>
 </body>
 </html>
