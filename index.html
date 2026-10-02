@@ -3,17 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TaskTracker - Continuous Alarm</title>
-  <!-- Icono para el navegador y pantalla de inicio en Android -->
+  <title>TaskTracker - Mobile Alarm Fix</title>
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-  
-  <!-- Icono específico para iPhone (Apple Touch Icon) -->
   <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
-
-  <!-- Enlace al archivo de configuración de la app (Web App Manifest) -->
   <link rel="manifest" href="manifest.json">
-
-  <!-- Configuración para ver a pantalla completa en móviles -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,26 +14,17 @@
   <meta name="theme-color" content="#1E293B">
   <style>
     :root {
-      /* Fondo neutro intermedio (Slate / Charcoal Soft) */
       --bg-body: #1E293B;
       --bg-main: #1E293B;
       --bg-card: #334155;
       --bg-card-secondary: #0F172A;
-      
-      /* Colores Neón Vibrantes */
       --neon-green: #00FF66;
       --neon-green-glow: rgba(0, 255, 102, 0.35);
-      
       --neon-cyan: #00E5FF;
       --neon-cyan-glow: rgba(0, 229, 255, 0.35);
-
       --neon-purple: #A855F7;
-      --neon-purple-glow: rgba(168, 85, 247, 0.3);
-
       --neon-red: #FF2E63;
       --neon-red-glow: rgba(255, 46, 99, 0.4);
-
-      /* Texto e Interfaz */
       --text-main: #F8FAFC;
       --text-sub: #94A3B8;
       --border-color: rgba(255, 255, 255, 0.12);
@@ -81,7 +65,6 @@
       border-right: 1px solid var(--border-color);
     }
 
-    /* Header UI */
     .header {
       padding: 24px 20px 12px 20px;
       display: flex;
@@ -131,7 +114,6 @@
       gap: 16px;
     }
 
-    /* Quick Action Button */
     .top-actions {
       display: flex;
       gap: 10px;
@@ -162,7 +144,6 @@
       box-shadow: 0 6px 20px var(--neon-green-glow);
     }
 
-    /* Section Titles */
     .section-title {
       font-size: 14px;
       font-weight: 900;
@@ -172,7 +153,6 @@
       margin: 12px 4px 0 4px;
     }
 
-    /* Task Cards */
     .task-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -249,12 +229,6 @@
       background: rgba(0, 255, 102, 0.2);
       color: var(--neon-green);
       border: 1px solid var(--neon-green);
-      animation: alertBlink 1s infinite alternate;
-    }
-
-    @keyframes alertBlink {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0.7; transform: scale(1.02); }
     }
 
     .task-action-btn {
@@ -273,7 +247,6 @@
       background: rgba(255,255,255,0.1);
     }
 
-    /* Battery Progress Bar */
     .battery-container {
       display: flex;
       align-items: center;
@@ -318,7 +291,6 @@
       color: var(--neon-green);
     }
 
-    /* Timer Row */
     .timer-row {
       display: flex;
       justify-content: space-between;
@@ -379,7 +351,6 @@
       font-weight: 700;
     }
 
-    /* Modal Form */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -479,8 +450,12 @@
 </head>
 <body>
 
+  <!-- Audio invisible en bucle para forzar al celular a mantener el canal de sonido abierto -->
+  <audio id="alarm-audio" loop preload="auto">
+    <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/ogg">
+  </audio>
+
   <div class="app-container">
-    <!-- Header -->
     <header class="header">
       <div class="brand-group">
         <div class="brand-icon">⏱️</div>
@@ -491,20 +466,17 @@
     <div class="date-subheader" id="current-date">VIERNES, 2 DE OCTUBRE DE 2026</div>
 
     <main class="main-content">
-      <!-- Quick Action Button -->
       <div class="top-actions">
         <button class="btn-action btn-add-primary" id="open-modal-btn">
           ➕ AGREGAR NUEVA TAREA
         </button>
       </div>
 
-      <!-- Active Tasks Section -->
       <div class="section-title">Mis Metas Activas</div>
       <div id="tasks-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </main>
   </div>
 
-  <!-- Modal for Creating/Editing Task -->
   <div class="modal-overlay" id="task-modal">
     <div class="modal-box">
       <div class="modal-title" id="modal-title-text">Nueva Meta con Fecha Límite</div>
@@ -532,15 +504,13 @@
   </div>
 
   <script>
-    // App State
-    let tasks = JSON.parse(localStorage.getItem('moneta_tasks_v10')) || [
+    let tasks = JSON.parse(localStorage.getItem('moneta_tasks_v11')) || [
       { id: 1, name: 'Estudiar Programación', goalHours: 5, loggedSeconds: 3600, deadline: '2026-10-10', active: false, startTime: null }
     ];
 
     let editingTaskId = null;
-    let alarmInterval = null; // Control para la alarma continua
+    const alarmAudio = document.getElementById('alarm-audio');
 
-    // Elements
     const tasksContainer = document.getElementById('tasks-container');
     const taskModal = document.getElementById('task-modal');
     const modalTitleText = document.getElementById('modal-title-text');
@@ -563,57 +533,40 @@
     }
 
     function saveState() {
-      localStorage.setItem('moneta_tasks_v10', JSON.stringify(tasks));
+      localStorage.setItem('moneta_tasks_v11', JSON.stringify(tasks));
     }
 
-    // Iniciar Alarma Continua en Bucle (Suena sin parar hasta que se interactúe)
-    function startContinuousAlarm(taskName) {
-      if (alarmInterval) return; // Ya está sonando
-
+    // Activar alarma real compatible con móviles
+    function startMobileAlarm(taskName) {
       if (navigator.vibrate) {
-        navigator.vibrate([1000, 500, 1000, 500, 1000]);
+        navigator.vibrate([1000, 500, 1000, 500, 1000, 500, 1000]);
       }
 
       if (window.Notification && Notification.permission === "granted") {
         try {
           new Notification("¡Meta Cumplida! 🎉", {
-            body: `¡Felicidades Óscar! Completaste "${taskName}". Entra a la app para detener la alarma.`,
+            body: `¡Felicidades Óscar! Completaste "${taskName}". Entra a la app para apagar la alarma.`,
             icon: "icon-192.png",
             requireInteraction: true
           });
         } catch (e) {}
       }
 
-      // Función que reproduce un tono largo y se repite cada 3 segundos
-      const playBeepPattern = () => {
-        try {
-          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          
-          osc.type = 'sine';
-          osc.frequency.value = 850;
-          
-          gain.gain.setValueAtTime(0.7, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.0); // Tono de 2 segundos
-          
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          
-          osc.start();
-          osc.stop(audioCtx.currentTime + 2.0);
-        } catch (e) {}
-      };
-
-      playBeepPattern(); // Sonar inmediatamente
-      alarmInterval = setInterval(playBeepPattern, 3000); // Repetir cada 3 segundos indefinidamente
+      // Reproducir archivo de audio continuo optimizado para web móvil
+      try {
+        alarmAudio.play().catch(err => {
+          console.log("Audio autoplay prevented by mobile browser", err);
+        });
+      } catch (e) {}
     }
 
-    // Detener la alarma continua cuando el usuario interactúe
-    function stopContinuousAlarm() {
-      if (alarmInterval) {
-        clearInterval(alarmInterval);
-        alarmInterval = null;
+    function stopMobileAlarm() {
+      try {
+        alarmAudio.pause();
+        alarmAudio.currentTime = 0;
+      } catch (e) {}
+      if (navigator.vibrate) {
+        navigator.vibrate(0);
       }
     }
 
@@ -656,11 +609,10 @@
         return;
       }
 
-      // Si alguna tarea está completada y activa la alarma, asegurarnos de que suene
-      const hasCompletedActive = tasks.some(t => t.status === 'completed');
-      if (hasCompletedActive && !alarmInterval) {
+      const hasCompletedActive = tasks.some(t => t.status === 'completed' && alarmAudio.paused);
+      if (hasCompletedActive) {
         const completedTask = tasks.find(t => t.status === 'completed');
-        startContinuousAlarm(completedTask.name);
+        startMobileAlarm(completedTask.name);
       }
 
       tasks.forEach(task => {
@@ -711,7 +663,7 @@
               ${formatTime(currentSecs)}
             </div>
             <button class="btn-timer ${task.active ? 'active' : ''}" ${timerDisabled} onclick="toggleTimer(${task.id})">
-              ${task.status === 'completed' ? 'TERMINADA' : (task.active ? 'PAUSAR' : 'INICIAR')}
+              ${task.status === 'completed' ? 'APAGAR ALARMA' : (task.active ? 'PAUSAR' : 'INICIAR')}
             </button>
           </div>
         `;
@@ -730,9 +682,8 @@
       const task = tasks.find(t => t.id === id);
       if (!task) return;
 
-      // Si la tarea ya se completó y sonaba la alarma, al hacer clic se detiene la alarma
       if (task.status === 'completed') {
-        stopContinuousAlarm();
+        stopMobileAlarm();
         saveState();
         render();
         return;
@@ -786,7 +737,7 @@
             task.active = false;
             task.startTime = null;
             task.status = 'completed';
-            startContinuousAlarm(task.name);
+            startMobileAlarm(task.name);
             updated = true;
           }
         }
@@ -808,7 +759,7 @@
             task.active = false;
             task.startTime = null;
             task.status = 'completed';
-            startContinuousAlarm(task.name);
+            startMobileAlarm(task.name);
             needsSave = true;
           }
 
@@ -847,7 +798,7 @@
 
     window.deleteTask = function(id) {
       if (confirm('¿Deseas eliminar esta tarea?')) {
-        stopContinuousAlarm();
+        stopMobileAlarm();
         tasks = tasks.filter(t => t.id !== id);
         saveState();
         render();
