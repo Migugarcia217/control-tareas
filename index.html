@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TaskTracker - Alarm Alert</title>
+  <title>TaskTracker - Background Timer</title>
   <!-- Icono para el navegador y pantalla de inicio en Android -->
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   
@@ -527,12 +527,11 @@
 
   <script>
     // App State
-    let tasks = JSON.parse(localStorage.getItem('moneta_tasks_v6')) || [
-      { id: 1, name: 'Estudiar Programación', goalHours: 5, loggedSeconds: 3600, deadline: '2026-10-10', active: false }
+    let tasks = JSON.parse(localStorage.getItem('moneta_tasks_v7')) || [
+      { id: 1, name: 'Estudiar Programación', goalHours: 5, loggedSeconds: 3600, deadline: '2026-10-10', active: false, startTime: null }
     ];
 
     let timerInterval = null;
-    let activeTaskId = null;
     let editingTaskId = null;
 
     // Elements
@@ -556,21 +555,17 @@
 
     // Save State
     function saveState() {
-      localStorage.setItem('moneta_tasks_v6', JSON.stringify(tasks));
-      render();
+      localStorage.setItem('moneta_tasks_v7', JSON.stringify(tasks));
     }
 
     // Sound Alarm Generator (Web Audio API) & Vibration
     function playAlarm() {
-      // Trigger vibration on mobile if supported
       if (navigator.vibrate) {
         navigator.vibrate([500, 250, 500, 250, 500]);
       }
 
-      // Generate beep sound using browser's AudioContext
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
         for (let i = 0; i < 3; i++) {
           setTimeout(() => {
             if (audioCtx.state === 'suspended') {
@@ -580,7 +575,7 @@
             const gain = audioCtx.createGain();
             
             osc.type = 'sine';
-            osc.frequency.value = 880; // High pitch alarm tone
+            osc.frequency.value = 880;
             
             gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
@@ -597,17 +592,26 @@
       }
     }
 
+    // Calculate elapsed time taking background time into account
+    function getTaskCurrentSeconds(task) {
+      if (task.active && task.startTime) {
+        const secondsSinceStart = Math.floor((Date.now() - task.startTime) / 1000);
+        return task.loggedSeconds + secondsSinceStart;
+      }
+      return task.loggedSeconds;
+    }
+
     // Check Deadlines Status
     function checkDeadlines() {
       const todayStr = new Date().toISOString().split('T')[0];
 
       tasks.forEach(task => {
+        const currentSecs = getTaskCurrentSeconds(task);
         if (task.deadline <= todayStr && !task.status) {
           if (task.active) {
             task.active = false;
-            clearInterval(timerInterval);
-            timerInterval = null;
-            activeTaskId = null;
+            task.loggedSeconds = currentSecs;
+            task.startTime = null;
           }
 
           const goalSeconds = task.goalHours * 3600;
@@ -632,8 +636,9 @@
 
       tasks.forEach(task => {
         const goalSeconds = task.goalHours * 3600;
-        const percent = Math.min(100, Math.round((task.loggedSeconds / goalSeconds) * 100));
-        const hoursLogged = (task.loggedSeconds / 3600).toFixed(1);
+        const currentSecs = getTaskCurrentSeconds(task);
+        const percent = Math.min(100, Math.round((currentSecs / goalSeconds) * 100));
+        const hoursLogged = (currentSecs / 3600).toFixed(1);
 
         let cardClass = 'task-card';
         let statusHTML = '';
@@ -655,7 +660,7 @@
           <div class="task-header">
             <div>
               <div class="task-name">${task.name}</div>
-              <div class="task-goal">${hoursLogged} / ${task.goalHours} hrs acumuladas</div>
+              <div class="task-goal" id="goal-${task.id}">${hoursLogged} / ${task.goalHours} hrs acumuladas</div>
               <div class="task-deadline">📅 Límite: ${task.deadline}</div>
               ${statusHTML}
             </div>
@@ -667,14 +672,14 @@
 
           <div class="battery-container">
             <div class="battery-shell">
-              <div class="battery-fill" style="width: ${percent}%;"></div>
+              <div class="battery-fill" id="fill-${task.id}" style="width: ${percent}%;"></div>
             </div>
-            <div class="battery-percent">${percent}%</div>
+            <div class="battery-percent" id="percent-${task.id}">${percent}%</div>
           </div>
 
           <div class="timer-row">
             <div class="timer-display" id="timer-${task.id}">
-              ${formatTime(task.loggedSeconds)}
+              ${formatTime(currentSecs)}
             </div>
             <button class="btn-timer ${task.active ? 'active' : ''}" ${timerDisabled} onclick="toggleTimer(${task.id})">
               ${task.active ? 'PAUSAR' : 'INICIAR'}
@@ -699,38 +704,67 @@
       if (!task || task.status) return;
 
       if (task.active) {
+        // Pausar: consolidar el tiempo transcurrido real
+        task.loggedSeconds = getTaskCurrentSeconds(task);
         task.active = false;
-        clearInterval(timerInterval);
-        timerInterval = null;
-        activeTaskId = null;
+        task.startTime = null;
       } else {
-        tasks.forEach(t => t.active = false);
-        clearInterval(timerInterval);
-
-        task.active = true;
-        activeTaskId = id;
-
-        timerInterval = setInterval(() => {
-          task.loggedSeconds++;
-          
-          // Check if goal is reached during active timing
-          if (task.loggedSeconds >= (task.goalHours * 3600)) {
-            task.active = false;
-            clearInterval(timerInterval);
-            timerInterval = null;
-            activeTaskId = null;
-            task.status = 'completed';
-            playAlarm(); // Sonar alarma y vibración
+        // Pausar cualquier otra tarea activa
+        tasks.forEach(t => {
+          if (t.active) {
+            t.loggedSeconds = getTaskCurrentSeconds(t);
+            t.active = false;
+            t.startTime = null;
           }
+        });
 
-          const timerEl = document.getElementById(`timer-${task.id}`);
-          if (timerEl) timerEl.textContent = formatTime(task.loggedSeconds);
-          
-          saveState();
-        }, 1000);
+        // Iniciar
+        task.active = true;
+        task.startTime = Date.now();
       }
       saveState();
+      render();
     };
+
+    // Global Loop to update UI smoothly and handle background returns
+    setInterval(() => {
+      let needsSave = false;
+      tasks.forEach(task => {
+        if (task.active) {
+          const currentSecs = getTaskCurrentSeconds(task);
+          const goalSeconds = task.goalHours * 3600;
+
+          // Check if goal reached while active
+          if (currentSecs >= goalSeconds) {
+            task.loggedSeconds = goalSeconds;
+            task.active = false;
+            task.startTime = null;
+            task.status = 'completed';
+            playAlarm();
+            needsSave = true;
+          }
+
+          // Live DOM updates for fluid countdown without full re-render
+          const timerEl = document.getElementById(`timer-${task.id}`);
+          const fillEl = document.getElementById(`fill-${task.id}`);
+          const percentEl = document.getElementById(`percent-${task.id}`);
+          const goalEl = document.getElementById(`goal-${task.id}`);
+
+          if (timerEl) timerEl.textContent = formatTime(currentSecs);
+          if (fillEl && percentEl && goalEl) {
+            const p = Math.min(100, Math.round((currentSecs / goalSeconds) * 100));
+            fillEl.style.width = `${p}%`;
+            percentEl.textContent = `${p}%`;
+            goalEl.textContent = `${(currentSecs / 3600).toFixed(1)} / ${task.goalHours} hrs acumuladas`;
+          }
+        }
+      });
+
+      if (needsSave) {
+        saveState();
+        render();
+      }
+    }, 1000);
 
     // Open Edit Modal
     window.openEditModal = function(id) {
@@ -748,9 +782,9 @@
     // Delete Task
     window.deleteTask = function(id) {
       if (confirm('¿Deseas eliminar esta tarea?')) {
-        if (activeTaskId === id) clearInterval(timerInterval);
         tasks = tasks.filter(t => t.id !== id);
         saveState();
+        render();
       }
     };
 
@@ -792,6 +826,7 @@
           loggedSeconds: 0,
           deadline,
           active: false,
+          startTime: null,
           status: undefined
         });
       }
@@ -802,12 +837,12 @@
       editingTaskId = null;
       taskModal.classList.remove('open');
       saveState();
+      render();
     };
 
     // Initialize
     updateDateDisplay();
     render();
-    setInterval(render, 30000);
   </script>
 </body>
 </html>
