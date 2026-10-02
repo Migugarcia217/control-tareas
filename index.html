@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TaskTracker - Background Sync</title>
+  <title>TaskTracker - Continuous Alarm</title>
   <!-- Icono para el navegador y pantalla de inicio en Android -->
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   
@@ -249,6 +249,12 @@
       background: rgba(0, 255, 102, 0.2);
       color: var(--neon-green);
       border: 1px solid var(--neon-green);
+      animation: alertBlink 1s infinite alternate;
+    }
+
+    @keyframes alertBlink {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0.7; transform: scale(1.02); }
     }
 
     .task-action-btn {
@@ -527,11 +533,12 @@
 
   <script>
     // App State
-    let tasks = JSON.parse(localStorage.getItem('moneta_tasks_v8')) || [
+    let tasks = JSON.parse(localStorage.getItem('moneta_tasks_v10')) || [
       { id: 1, name: 'Estudiar Programación', goalHours: 5, loggedSeconds: 3600, deadline: '2026-10-10', active: false, startTime: null }
     ];
 
     let editingTaskId = null;
+    let alarmInterval = null; // Control para la alarma continua
 
     // Elements
     const tasksContainer = document.getElementById('tasks-container');
@@ -545,53 +552,71 @@
     const taskDateInput = document.getElementById('task-date-input');
     const currentDateEl = document.getElementById('current-date');
 
-    // Date Display
+    if (window.Notification && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
     function updateDateDisplay() {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const today = new Date();
       currentDateEl.textContent = today.toLocaleDateString('es-ES', options).toUpperCase();
     }
 
-    // Save State
     function saveState() {
-      localStorage.setItem('moneta_tasks_v8', JSON.stringify(tasks));
+      localStorage.setItem('moneta_tasks_v10', JSON.stringify(tasks));
     }
 
-    // Sound Alarm Generator (Web Audio API) & Vibration
-    function playAlarm() {
+    // Iniciar Alarma Continua en Bucle (Suena sin parar hasta que se interactúe)
+    function startContinuousAlarm(taskName) {
+      if (alarmInterval) return; // Ya está sonando
+
       if (navigator.vibrate) {
-        navigator.vibrate([500, 250, 500, 250, 500]);
+        navigator.vibrate([1000, 500, 1000, 500, 1000]);
       }
 
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        for (let i = 0; i < 3; i++) {
-          setTimeout(() => {
-            if (audioCtx.state === 'suspended') {
-              audioCtx.resume();
-            }
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            
-            osc.type = 'sine';
-            osc.frequency.value = 880;
-            
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-            
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.4);
-          }, i * 600);
-        }
-      } catch (e) {
-        console.log('Audio Context error', e);
+      if (window.Notification && Notification.permission === "granted") {
+        try {
+          new Notification("¡Meta Cumplida! 🎉", {
+            body: `¡Felicidades Óscar! Completaste "${taskName}". Entra a la app para detener la alarma.`,
+            icon: "icon-192.png",
+            requireInteraction: true
+          });
+        } catch (e) {}
+      }
+
+      // Función que reproduce un tono largo y se repite cada 3 segundos
+      const playBeepPattern = () => {
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          
+          osc.type = 'sine';
+          osc.frequency.value = 850;
+          
+          gain.gain.setValueAtTime(0.7, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.0); // Tono de 2 segundos
+          
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          
+          osc.start();
+          osc.stop(audioCtx.currentTime + 2.0);
+        } catch (e) {}
+      };
+
+      playBeepPattern(); // Sonar inmediatamente
+      alarmInterval = setInterval(playBeepPattern, 3000); // Repetir cada 3 segundos indefinidamente
+    }
+
+    // Detener la alarma continua cuando el usuario interactúe
+    function stopContinuousAlarm() {
+      if (alarmInterval) {
+        clearInterval(alarmInterval);
+        alarmInterval = null;
       }
     }
 
-    // Calculate current seconds based on actual real-world clock time
     function getTaskCurrentSeconds(task) {
       if (task.active && task.startTime) {
         const secondsSinceStart = Math.floor((Date.now() - task.startTime) / 1000);
@@ -600,7 +625,6 @@
       return task.loggedSeconds;
     }
 
-    // Check Deadlines Status
     function checkDeadlines() {
       const todayStr = new Date().toISOString().split('T')[0];
 
@@ -623,7 +647,6 @@
       });
     }
 
-    // Render Function
     function render() {
       checkDeadlines();
       tasksContainer.innerHTML = '';
@@ -631,6 +654,13 @@
       if (tasks.length === 0) {
         tasksContainer.innerHTML = `<div class="empty-history">No tienes metas activas. ¡Agrega una para comenzar!</div>`;
         return;
+      }
+
+      // Si alguna tarea está completada y activa la alarma, asegurarnos de que suene
+      const hasCompletedActive = tasks.some(t => t.status === 'completed');
+      if (hasCompletedActive && !alarmInterval) {
+        const completedTask = tasks.find(t => t.status === 'completed');
+        startContinuousAlarm(completedTask.name);
       }
 
       tasks.forEach(task => {
@@ -681,7 +711,7 @@
               ${formatTime(currentSecs)}
             </div>
             <button class="btn-timer ${task.active ? 'active' : ''}" ${timerDisabled} onclick="toggleTimer(${task.id})">
-              ${task.active ? 'PAUSAR' : 'INICIAR'}
+              ${task.status === 'completed' ? 'TERMINADA' : (task.active ? 'PAUSAR' : 'INICIAR')}
             </button>
           </div>
         `;
@@ -689,7 +719,6 @@
       });
     }
 
-    // Format Seconds to HH:MM:SS
     function formatTime(totalSeconds) {
       const hrs = Math.floor(totalSeconds / 3600);
       const mins = Math.floor((totalSeconds % 3600) / 60);
@@ -697,10 +726,19 @@
       return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
 
-    // Toggle Timer
     window.toggleTimer = function(id) {
       const task = tasks.find(t => t.id === id);
-      if (!task || task.status) return;
+      if (!task) return;
+
+      // Si la tarea ya se completó y sonaba la alarma, al hacer clic se detiene la alarma
+      if (task.status === 'completed') {
+        stopContinuousAlarm();
+        saveState();
+        render();
+        return;
+      }
+
+      if (task.status) return;
 
       if (task.active) {
         task.loggedSeconds = getTaskCurrentSeconds(task);
@@ -722,20 +760,42 @@
       render();
     };
 
-    // CRITICAL: Detect when user returns to the app from background/lockscreen and sync instantly
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") {
+        checkGoalCompletionOnSync();
         saveState();
-        render(); // Recalcula y actualiza todo el tiempo transcurrido en segundo plano
+        render();
       }
     });
 
     window.addEventListener("pageshow", () => {
+      checkGoalCompletionOnSync();
       saveState();
       render();
     });
 
-    // Global Loop for smooth ticking when app is open
+    function checkGoalCompletionOnSync() {
+      let updated = false;
+      tasks.forEach(task => {
+        if (task.active) {
+          const currentSecs = getTaskCurrentSeconds(task);
+          const goalSeconds = task.goalHours * 3600;
+
+          if (currentSecs >= goalSeconds) {
+            task.loggedSeconds = goalSeconds;
+            task.active = false;
+            task.startTime = null;
+            task.status = 'completed';
+            startContinuousAlarm(task.name);
+            updated = true;
+          }
+        }
+      });
+      if (updated) {
+        saveState();
+      }
+    }
+
     setInterval(() => {
       let needsSave = false;
       tasks.forEach(task => {
@@ -748,7 +808,7 @@
             task.active = false;
             task.startTime = null;
             task.status = 'completed';
-            playAlarm();
+            startContinuousAlarm(task.name);
             needsSave = true;
           }
 
@@ -773,7 +833,6 @@
       }
     }, 1000);
 
-    // Open Edit Modal
     window.openEditModal = function(id) {
       const task = tasks.find(t => t.id === id);
       if (!task) return;
@@ -786,16 +845,15 @@
       taskModal.classList.add('open');
     };
 
-    // Delete Task
     window.deleteTask = function(id) {
       if (confirm('¿Deseas eliminar esta tarea?')) {
+        stopContinuousAlarm();
         tasks = tasks.filter(t => t.id !== id);
         saveState();
         render();
       }
     };
 
-    // Modal Control
     openModalBtn.onclick = () => {
       editingTaskId = null;
       modalTitleText.textContent = 'Nueva Meta con Fecha Límite';
@@ -805,7 +863,7 @@
       taskModal.classList.add('open');
     };
 
-    closeModalBtn.onclick = () => taskModal.classList.remove('org') || taskModal.classList.remove('open');
+    closeModalBtn.onclick = () => taskModal.classList.remove('open');
 
     saveTaskBtn.onclick = () => {
       const name = taskNameInput.value.trim();
@@ -847,7 +905,6 @@
       render();
     };
 
-    // Initialize
     updateDateDisplay();
     render();
   </script>
