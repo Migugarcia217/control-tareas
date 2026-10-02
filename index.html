@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TaskTracker - Mobile Alarm Fix</title>
+  <title>TaskTracker - Wake Lock & Loud Alarm</title>
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
@@ -24,7 +24,7 @@
       --neon-cyan-glow: rgba(0, 229, 255, 0.35);
       --neon-purple: #A855F7;
       --neon-red: #FF2E63;
-      --neon-red-glow: rgba(255, 46, 99, 0.4);
+      --neon-red-glow: rgba(255, 46, 99, 0.5);
       --text-main: #F8FAFC;
       --text-sub: #94A3B8;
       --border-color: rgba(255, 255, 255, 0.12);
@@ -171,8 +171,14 @@
     }
 
     .task-card.completed {
-      border-color: var(--neon-green);
-      box-shadow: 0 8px 20px var(--neon-green-glow);
+      border-color: var(--neon-red);
+      box-shadow: 0 0 25px var(--neon-red-glow);
+      animation: pulseAlert 0.8s infinite alternate;
+    }
+
+    @keyframes pulseAlert {
+      0% { border-color: var(--neon-red); }
+      100% { border-color: #FFF; }
     }
 
     .task-header {
@@ -226,9 +232,9 @@
     }
 
     .status-badge.completed {
-      background: rgba(0, 255, 102, 0.2);
-      color: var(--neon-green);
-      border: 1px solid var(--neon-green);
+      background: rgba(255, 46, 99, 0.3);
+      color: #FFF;
+      border: 1px solid var(--neon-red);
     }
 
     .task-action-btn {
@@ -330,7 +336,20 @@
     .btn-timer.active {
       background: var(--neon-red);
       color: #FFF;
-      box-shadow: 0 0 12px var(--neon-red-glow);
+      box-shadow: 0 0 15px var(--neon-red-glow);
+    }
+
+    .btn-timer.alarm-ringing {
+      background: var(--neon-red);
+      color: #FFF;
+      font-size: 15px;
+      box-shadow: 0 0 25px var(--neon-red-glow);
+      animation: buttonBlink 0.5s infinite alternate;
+    }
+
+    @keyframes buttonBlink {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.06); }
     }
 
     .btn-timer:disabled {
@@ -450,11 +469,6 @@
 </head>
 <body>
 
-  <!-- Audio invisible en bucle para forzar al celular a mantener el canal de sonido abierto -->
-  <audio id="alarm-audio" loop preload="auto">
-    <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/ogg">
-  </audio>
-
   <div class="app-container">
     <header class="header">
       <div class="brand-group">
@@ -504,12 +518,13 @@
   </div>
 
   <script>
-    let tasks = JSON.parse(localStorage.getItem('moneta_tasks_v11')) || [
+    let tasks = JSON.parse(localStorage.getItem('moneta_tasks_v12')) || [
       { id: 1, name: 'Estudiar Programación', goalHours: 5, loggedSeconds: 3600, deadline: '2026-10-10', active: false, startTime: null }
     ];
 
     let editingTaskId = null;
-    const alarmAudio = document.getElementById('alarm-audio');
+    let alarmTimer = null;
+    let wakeLock = null; // Para evitar que la pantalla se apague en el celular
 
     const tasksContainer = document.getElementById('tasks-container');
     const taskModal = document.getElementById('task-modal');
@@ -522,10 +537,6 @@
     const taskDateInput = document.getElementById('task-date-input');
     const currentDateEl = document.getElementById('current-date');
 
-    if (window.Notification && Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
-
     function updateDateDisplay() {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const today = new Date();
@@ -533,38 +544,78 @@
     }
 
     function saveState() {
-      localStorage.setItem('moneta_tasks_v11', JSON.stringify(tasks));
+      localStorage.setItem('moneta_tasks_v12', JSON.stringify(tasks));
     }
 
-    // Activar alarma real compatible con móviles
-    function startMobileAlarm(taskName) {
-      if (navigator.vibrate) {
-        navigator.vibrate([1000, 500, 1000, 500, 1000, 500, 1000]);
-      }
-
-      if (window.Notification && Notification.permission === "granted") {
+    // Activar Wake Lock para que el celular no apague la pantalla mientras corra el cronómetro
+    async function requestWakeLock() {
+      if ('wakeLock' in navigator) {
         try {
-          new Notification("¡Meta Cumplida! 🎉", {
-            body: `¡Felicidades Óscar! Completaste "${taskName}". Entra a la app para apagar la alarma.`,
-            icon: "icon-192.png",
-            requireInteraction: true
-          });
-        } catch (e) {}
+          wakeLock = await navigator.wakeLock.request('screen');
+        } catch (err) {
+          console.log('Wake Lock error', err);
+        }
       }
-
-      // Reproducir archivo de audio continuo optimizado para web móvil
-      try {
-        alarmAudio.play().catch(err => {
-          console.log("Audio autoplay prevented by mobile browser", err);
-        });
-      } catch (e) {}
     }
 
-    function stopMobileAlarm() {
-      try {
-        alarmAudio.pause();
-        alarmAudio.currentTime = 0;
-      } catch (e) {}
+    async function releaseWakeLock() {
+      if (wakeLock !== null) {
+        try {
+          await wakeLock.release();
+          wakeLock = null;
+        } catch (err) {
+          console.log('Wake Lock release error', err);
+        }
+      }
+    }
+
+    // Alarma ultra fuerte y continua (Pitido largo + Vibración ruda)
+    function startLoudAlarm() {
+      if (alarmTimer) return;
+
+      const triggerBuzz = () => {
+        // Vibración fuerte y larga compatible con Android
+        if (navigator.vibrate) {
+          navigator.vibrate([1200, 400, 1200, 400, 1200]);
+        }
+
+        // Tono de audio sintetizado fuerte de alta frecuencia
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+          }
+          
+          for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+              const osc = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              
+              osc.type = 'sawtooth'; // Sonido más penetrante y fuerte que el 'sine'
+              osc.frequency.value = 950;
+              
+              gain.gain.setValueAtTime(1.0, audioCtx.currentTime); // Volumen máximo
+              gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+              
+              osc.connect(gain);
+              gain.connect(audioCtx.destination);
+              
+              osc.start();
+              osc.stop(audioCtx.currentTime + 0.6);
+            }, i * 400);
+          }
+        } catch (e) {}
+      };
+
+      triggerBuzz();
+      alarmTimer = setInterval(triggerBuzz, 3500); // Se repite cada 3.5 segundos sin parar
+    }
+
+    function stopLoudAlarm() {
+      if (alarmTimer) {
+        clearInterval(alarmTimer);
+        alarmTimer = null;
+      }
       if (navigator.vibrate) {
         navigator.vibrate(0);
       }
@@ -588,6 +639,7 @@
             task.active = false;
             task.loggedSeconds = currentSecs;
             task.startTime = null;
+            releaseWakeLock();
           }
 
           const goalSeconds = task.goalHours * 3600;
@@ -609,10 +661,9 @@
         return;
       }
 
-      const hasCompletedActive = tasks.some(t => t.status === 'completed' && alarmAudio.paused);
-      if (hasCompletedActive) {
-        const completedTask = tasks.find(t => t.status === 'completed');
-        startMobileAlarm(completedTask.name);
+      const hasCompletedActive = tasks.some(t => t.status === 'completed');
+      if (hasCompletedActive && !alarmTimer) {
+        startLoudAlarm();
       }
 
       tasks.forEach(task => {
@@ -623,16 +674,21 @@
 
         let cardClass = 'task-card';
         let statusHTML = '';
-        let timerDisabled = '';
+        let timerButtonClass = 'btn-timer';
+        let timerButtonText = 'INICIAR';
 
         if (task.status === 'failed') {
           cardClass += ' failed';
           statusHTML = `<div class="status-badge failed">❌ Fallaste</div>`;
-          timerDisabled = 'disabled';
+          timerButtonText = 'FINALIZADA';
         } else if (task.status === 'completed') {
           cardClass += ' completed';
-          statusHTML = `<div class="status-badge completed">🎉 Cumpliste</div>`;
-          timerDisabled = 'disabled';
+          statusHTML = `<div class="status-badge completed">🎉 ¡CUMPLISTE LA META!</div>`;
+          timerButtonClass += ' alarm-ringing';
+          timerButtonText = '🔕 APAGAR ALARMA';
+        } else if (task.active) {
+          timerButtonClass += ' active';
+          timerButtonText = 'PAUSAR';
         }
 
         const card = document.createElement('div');
@@ -662,8 +718,8 @@
             <div class="timer-display" id="timer-${task.id}">
               ${formatTime(currentSecs)}
             </div>
-            <button class="btn-timer ${task.active ? 'active' : ''}" ${timerDisabled} onclick="toggleTimer(${task.id})">
-              ${task.status === 'completed' ? 'APAGAR ALARMA' : (task.active ? 'PAUSAR' : 'INICIAR')}
+            <button class="${timerButtonClass}" ${task.status === 'failed' ? 'disabled' : ''} onclick="toggleTimer(${task.id})">
+              ${timerButtonText}
             </button>
           </div>
         `;
@@ -683,18 +739,20 @@
       if (!task) return;
 
       if (task.status === 'completed') {
-        stopMobileAlarm();
+        stopLoudAlarm();
+        task.status = 'done'; // Marcar como finalizada para quitar el estado de alerta
         saveState();
         render();
         return;
       }
 
-      if (task.status) return;
+      if (task.status === 'failed' || task.status === 'done') return;
 
       if (task.active) {
         task.loggedSeconds = getTaskCurrentSeconds(task);
         task.active = false;
         task.startTime = null;
+        releaseWakeLock();
       } else {
         tasks.forEach(t => {
           if (t.active) {
@@ -706,46 +764,11 @@
 
         task.active = true;
         task.startTime = Date.now();
+        requestWakeLock(); // Mantener pantalla encendida
       }
       saveState();
       render();
     };
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        checkGoalCompletionOnSync();
-        saveState();
-        render();
-      }
-    });
-
-    window.addEventListener("pageshow", () => {
-      checkGoalCompletionOnSync();
-      saveState();
-      render();
-    });
-
-    function checkGoalCompletionOnSync() {
-      let updated = false;
-      tasks.forEach(task => {
-        if (task.active) {
-          const currentSecs = getTaskCurrentSeconds(task);
-          const goalSeconds = task.goalHours * 3600;
-
-          if (currentSecs >= goalSeconds) {
-            task.loggedSeconds = goalSeconds;
-            task.active = false;
-            task.startTime = null;
-            task.status = 'completed';
-            startMobileAlarm(task.name);
-            updated = true;
-          }
-        }
-      });
-      if (updated) {
-        saveState();
-      }
-    }
 
     setInterval(() => {
       let needsSave = false;
@@ -759,7 +782,8 @@
             task.active = false;
             task.startTime = null;
             task.status = 'completed';
-            startMobileAlarm(task.name);
+            releaseWakeLock();
+            startLoudAlarm();
             needsSave = true;
           }
 
@@ -798,7 +822,8 @@
 
     window.deleteTask = function(id) {
       if (confirm('¿Deseas eliminar esta tarea?')) {
-        stopMobileAlarm();
+        stopLoudAlarm();
+        releaseWakeLock();
         tasks = tasks.filter(t => t.id !== id);
         saveState();
         render();
